@@ -18,14 +18,26 @@ public class AllBucketIds {
   
   private final Map<String,String> redundancyZonesPerServer;
   
-  private final Map<String,List<Integer>> bucketIdsPerServer;
-
-  private final Map<String,List<Integer>> bucketIdsPerRedundancyZone;
+  private final Map<String,List<Integer>> allBucketIdsPerRedundancyZone;
   
+  private final Map<String,List<Integer>> allBucketIdsPerServer;
+
+  private final Map<String,List<Integer>> primaryBucketIdsPerRedundancyZone;
+
+  private final Map<String,List<Integer>> primaryBucketIdsPerServer;
+
+  private int totalNumberOfBucketIds;
+
+  private int totalNumberOfPrimaryBucketIds;
+
   public AllBucketIds() {
     this.redundancyZonesPerServer = new HashMap<>();
-    this.bucketIdsPerRedundancyZone = new HashMap<>();
-    this.bucketIdsPerServer = new HashMap<>();
+    this.allBucketIdsPerRedundancyZone = new HashMap<>();
+    this.allBucketIdsPerServer = new HashMap<>();
+    this.primaryBucketIdsPerRedundancyZone = new HashMap<>();
+    this.primaryBucketIdsPerServer = new HashMap<>();
+    this.totalNumberOfBucketIds = 0;
+    this.totalNumberOfPrimaryBucketIds = 0;
   }
 
   public void process(String server, ServerBucketIds serverBucketIds) {
@@ -37,16 +49,28 @@ public class AllBucketIds {
   }
   
   private void updateBucketsPerServer(String server, ServerBucketIds serverBucketIds) {
-    Collections.sort(serverBucketIds.getBucketIds());
-    this.bucketIdsPerServer.put(server, serverBucketIds.getBucketIds());
+    // Sort and add all bucket ids
+    Collections.sort(serverBucketIds.getAllBucketIds());
+    this.allBucketIdsPerServer.put(server, serverBucketIds.getAllBucketIds());
+    this.totalNumberOfBucketIds += serverBucketIds.getTotalNumberOfBucketIds();
+
+    // Sort and add primary bucket ids
+    Collections.sort(serverBucketIds.getPrimaryBucketIds());
+    this.primaryBucketIdsPerServer.put(server, serverBucketIds.getPrimaryBucketIds());
+    this.totalNumberOfPrimaryBucketIds += serverBucketIds.getTotalNumberOfPrimaryBucketIds();
   }
   
   private void updateBucketsPerRedundancyZone(ServerBucketIds serverBucketIds) {
+    // Sort and add all bucket ids
     String redundancyZone = serverBucketIds.getRedundancyZone();
-    List<Integer> redundancyZoneBucketIds = this.bucketIdsPerRedundancyZone.computeIfAbsent(redundancyZone, k -> new ArrayList<>());
-    redundancyZoneBucketIds.addAll(serverBucketIds.getBucketIds());
-    Collections.sort(redundancyZoneBucketIds);
-    this.bucketIdsPerRedundancyZone.put(redundancyZone, redundancyZoneBucketIds);
+    List<Integer> redundancyZoneAllBucketIds = this.allBucketIdsPerRedundancyZone.computeIfAbsent(redundancyZone, k -> new ArrayList<>());
+    redundancyZoneAllBucketIds.addAll(serverBucketIds.getAllBucketIds());
+    Collections.sort(redundancyZoneAllBucketIds);
+
+    // Sort and add primary bucket ids
+    List<Integer> redundancyZonePrimaryBucketIds = this.primaryBucketIdsPerRedundancyZone.computeIfAbsent(redundancyZone, k -> new ArrayList<>());
+    redundancyZonePrimaryBucketIds.addAll(serverBucketIds.getPrimaryBucketIds());
+    Collections.sort(redundancyZonePrimaryBucketIds);
   }
   
   public String getDisplayString() {
@@ -56,12 +80,18 @@ public class AllBucketIds {
       .append(this.regionName)
       .append("\nConfigured Number of Buckets: ")
       .append(this.configuredNumberOfBuckets);
-
-    // Add bucket ids per server
-    addServerBucketIds(builder);
+      
+    // Add all bucket ids per server
+    addAllServerBucketIds(builder);
     
-    // Add bucket ids per redundancy zone
-    addRedundancyZoneBucketIds(builder);
+    // Add primary bucket ids per server
+    addPrimaryServerBucketIds(builder);
+    
+    // Add all bucket ids per redundancy zone
+    addAllRedundancyZoneBucketIds(builder);
+    
+    // Add primary bucket ids per redundancy zone
+    addPrimaryRedundancyZoneBucketIds(builder);
     
     // Add missing bucket ids in each redundancy zone
     addMissingBucketsInRedundancyZone(builder);
@@ -69,17 +99,17 @@ public class AllBucketIds {
     // Add extra bucket ids in each redundancy zone
     addExtraBucketsInRedundancyZone(builder);
     
-    builder.append("\n");
-
     return builder.toString();
   }
   
-  private void addServerBucketIds(StringBuilder builder) {
+  private void addAllServerBucketIds(StringBuilder builder) {
     builder
       .append("\nThe ")
-      .append(this.bucketIdsPerServer.size())
-      .append(" servers contain the following bucket ids:");
-    this.bucketIdsPerServer.forEach((key, value) -> builder
+      .append(this.allBucketIdsPerServer.size())
+      .append(" servers contain the following ")
+      .append(this.totalNumberOfBucketIds)
+      .append(" bucket ids:");
+    this.allBucketIdsPerServer.forEach((key, value) -> builder
       .append("\n\t Server ")
       .append(key)
       .append(" in zone ")
@@ -90,12 +120,30 @@ public class AllBucketIds {
       .append(value));
   }
   
-  private void addRedundancyZoneBucketIds(StringBuilder builder) {
+  private void addPrimaryServerBucketIds(StringBuilder builder) {
     builder
       .append("\nThe ")
-      .append(this.bucketIdsPerRedundancyZone.size())
+      .append(this.primaryBucketIdsPerServer.size())
+      .append(" servers contain the following ")
+      .append(this.totalNumberOfPrimaryBucketIds)
+      .append(" primary bucket ids:");
+    this.primaryBucketIdsPerServer.forEach((key, value) -> builder
+      .append("\n\t Server ")
+      .append(key)
+      .append(" in zone ")
+      .append(this.redundancyZonesPerServer.get(key))
+      .append(" contains ")
+      .append(value.size())
+      .append(" primary bucket ids: ")
+      .append(value));
+  }
+  
+  private void addAllRedundancyZoneBucketIds(StringBuilder builder) {
+    builder
+      .append("\nThe ")
+      .append(this.allBucketIdsPerRedundancyZone.size())
       .append(" redundancy zones contain the following bucket ids:");
-    this.bucketIdsPerRedundancyZone.forEach((key, value) -> builder
+    this.allBucketIdsPerRedundancyZone.forEach((key, value) -> builder
       .append("\n\tZone ")
       .append(key)
       .append(" contains ")
@@ -104,9 +152,23 @@ public class AllBucketIds {
       .append(value));
   }
   
+  private void addPrimaryRedundancyZoneBucketIds(StringBuilder builder) {
+    builder
+      .append("\nThe ")
+      .append(this.primaryBucketIdsPerRedundancyZone.size())
+      .append(" redundancy zones contain the following primary bucket ids:");
+    this.primaryBucketIdsPerRedundancyZone.forEach((key, value) -> builder
+      .append("\n\tZone ")
+      .append(key)
+      .append(" contains ")
+      .append(value.size())
+      .append(" primary bucket ids: ")
+      .append(value));
+  }
+  
   private void addMissingBucketsInRedundancyZone(StringBuilder builder) {
     Map<String,List<Integer>> missingBucketIdsPerRedundancyZone = new HashMap<>();
-    this.bucketIdsPerRedundancyZone.forEach((key, value) -> {
+    this.allBucketIdsPerRedundancyZone.forEach((key, value) -> {
       List<Integer> missingBucketIds = missingBucketIdsPerRedundancyZone.computeIfAbsent(key, k -> new ArrayList<>());
       IntStream.range(0, this.configuredNumberOfBuckets).forEach(bucketId -> {
         if (!value.contains(bucketId)) {
@@ -119,7 +181,7 @@ public class AllBucketIds {
   
   private void addExtraBucketsInRedundancyZone(StringBuilder builder) {
     Map<String,List<Integer>> extraBucketIdsPerRedundancyZone = new HashMap<>();
-    this.bucketIdsPerRedundancyZone.forEach((key, value) -> {
+    this.allBucketIdsPerRedundancyZone.forEach((key, value) -> {
       List<Integer> extraBucketIds = extraBucketIdsPerRedundancyZone.computeIfAbsent(key, k -> new ArrayList<>());
       Set<Integer> distinctBucketIds = new HashSet<>();
       value.forEach(bucketId -> {
@@ -148,5 +210,23 @@ public class AllBucketIds {
       .append(type)
       .append(" bucket ids: ")
       .append(value));
+  }
+
+  public String toString() {
+    return new StringBuilder()
+      .append(getClass().getSimpleName())
+      .append("[")
+      .append("; configuredNumberOfBuckets=")
+      .append(this.configuredNumberOfBuckets)
+      .append("; allBucketIdsPerServer=")
+      .append(this.allBucketIdsPerServer)
+      .append("; primaryBucketIdsPerServer=")
+      .append(this.primaryBucketIdsPerServer)
+      .append("; allBucketIdsPerRedundancyZone=")
+      .append(this.allBucketIdsPerRedundancyZone)
+      .append("; primaryBucketIdsPerRedundancyZone=")
+      .append(this.primaryBucketIdsPerRedundancyZone)
+      .append("]")
+      .toString();
   }
 }

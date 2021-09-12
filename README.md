@@ -8,14 +8,19 @@ For each server, the **GetBucketIdsFunction** returns a **ServerBucketIds** obje
 - region name
 - redundancy zone
 - configured number of buckets
-- bucket ids
+- all bucket ids
+- primary bucket ids
 
 The **GetBucketIdsResultCollector** on the client combines all the **ServerBucketIds** into an **AllBucketIds** object containing:
 
-- bucket ids per server
-- bucket ids per redundancy zone
+- all bucket ids per server
+- primary bucket ids per server
+- all bucket ids per redundancy zone
+- primary bucket ids per redundancy zone
 - missing bucket ids per redundancy zone
 - extra bucket ids per redundancy zone
+- total number of bucket ids
+- total number of primary buckets
 
 ## Initialization
 Modify the **GEODE** environment variable in the *setenv.sh* script to point to a Geode installation directory.
@@ -41,7 +46,7 @@ The parameters are:
 - number of entries (e.g. 10000)
 
 ```
-./runclient.sh load-regions 10000
+./runclient.sh load-customers-and-orders 10000
 ```
 ### Log Buckets
 Log the buckets using the *runclient.sh* script like below.
@@ -50,7 +55,6 @@ The parameters are:
 
 - operation (log-buckets)
 - region name (e.g. Customer)
-
 
 ```
 ./runclient.sh log-buckets Customer
@@ -371,22 +375,32 @@ Sample output from the *runclient.sh* script is:
 ```
 ./runclient.sh log-buckets Customer
 
-2021-08-29 16:10:02.329  INFO 45609 --- [           main] example.client.Client                    : Starting Client ...
+2021-09-11 14:41:13.443  INFO 94377 --- [           main] example.client.Client                    : Starting Client ...
 ...
-2021-08-29 16:10:06.427  INFO 45609 --- [           main] example.client.Client                    : Started Client in 4.574 seconds (JVM running for 5.132)
-2021-08-29 16:10:06.717  INFO 45609 --- [           main] example.client.service.CustomerService   : 
+2021-09-11 14:41:16.425  INFO 94377 --- [           main] example.client.Client                    : Started Client in 3.338 seconds (JVM running for 3.792)
+2021-09-11 14:41:16.709  INFO 94377 --- [           main] example.client.service.CustomerService   : 
 Region: Customer
 Configured Number of Buckets: 113
-The 6 servers contain the following bucket ids:
-         Server server-1-a in zone zoneA contains 37 bucket ids: [0, 4, 10, 12, 14, 16, 22, 24, 27, 32, 33, 36, 38, 40, 50, 53, 55, 56, 62, 64, 69, 71, 73, 77, 78, 82, 85, 86, 88, 89, 90, 95, 96, 100, 104, 107, 111]
-         Server server-1-b in zone zoneB contains 38 bucket ids: [0, 3, 5, 7, 8, 12, 14, 16, 17, 23, 24, 25, 32, 35, 39, 41, 44, 45, 48, 52, 55, 58, 60, 65, 72, 74, 76, 82, 85, 86, 91, 92, 94, 99, 104, 105, 108, 110]
-         Server server-2-a in zone zoneA contains 38 bucket ids: [1, 5, 9, 13, 17, 19, 21, 23, 26, 28, 30, 37, 39, 43, 44, 45, 51, 52, 57, 59, 60, 61, 63, 67, 72, 74, 75, 79, 80, 83, 92, 94, 97, 98, 101, 106, 109, 112]
-         Server server-2-b in zone zoneB contains 37 bucket ids: [2, 9, 13, 15, 18, 21, 27, 29, 30, 34, 36, 40, 42, 43, 47, 49, 51, 54, 61, 64, 66, 69, 73, 77, 78, 79, 83, 87, 88, 89, 93, 97, 98, 100, 103, 107, 112]
-         Server server-3-a in zone zoneA contains 38 bucket ids: [2, 3, 6, 7, 8, 11, 15, 18, 20, 25, 29, 31, 34, 35, 41, 42, 46, 47, 48, 49, 54, 58, 65, 66, 68, 70, 76, 81, 84, 87, 91, 93, 99, 102, 103, 105, 108, 110]
-         Server server-3-b in zone zoneB contains 38 bucket ids: [1, 4, 6, 10, 11, 19, 20, 22, 26, 28, 31, 33, 37, 38, 46, 50, 53, 56, 57, 59, 62, 63, 67, 68, 70, 71, 75, 80, 81, 84, 90, 95, 96, 101, 102, 106, 109, 111]
+The 6 servers contain the following 226 bucket ids:
+         Server server-1-a in zone zoneA contains 38 bucket ids: [1, 3, 9, 10, 18, 19, 22, 23, 29, 32, 34, 35, 37, 40, 43, 50, 51, 55, 61, 63, 68, 72, 73, 76, 79, 81, 85, 88, 89, 91, 93, 96, 99, 103, 106, 108, 109, 112]
+         Server server-1-b in zone zoneB contains 38 bucket ids: [1, 4, 6, 10, 12, 14, 16, 17, 19, 24, 31, 33, 34, 39, 43, 45, 47, 49, 53, 58, 62, 66, 67, 68, 71, 72, 75, 81, 82, 83, 92, 95, 96, 98, 99, 100, 105, 111]
+         Server server-2-a in zone zoneA contains 38 bucket ids: [0, 5, 6, 7, 8, 12, 14, 17, 20, 25, 30, 31, 36, 41, 42, 45, 47, 49, 52, 53, 59, 62, 64, 66, 69, 71, 74, 77, 82, 83, 86, 87, 90, 94, 98, 101, 102, 107]
+         Server server-3-a in zone zoneA contains 37 bucket ids: [2, 4, 11, 13, 15, 16, 21, 24, 26, 27, 28, 33, 38, 39, 44, 46, 48, 54, 56, 57, 58, 60, 65, 67, 70, 75, 78, 80, 84, 92, 95, 97, 100, 104, 105, 110, 111]
+         Server server-2-b in zone zoneB contains 37 bucket ids: [2, 5, 9, 11, 20, 22, 23, 26, 27, 30, 35, 37, 40, 41, 44, 48, 51, 52, 54, 60, 61, 65, 73, 74, 78, 84, 86, 87, 88, 89, 90, 93, 94, 101, 103, 107, 112]
+         Server server-3-b in zone zoneB contains 38 bucket ids: [0, 3, 7, 8, 13, 15, 18, 21, 25, 28, 29, 32, 36, 38, 42, 46, 50, 55, 56, 57, 59, 63, 64, 69, 70, 76, 77, 79, 80, 85, 91, 97, 102, 104, 106, 108, 109, 110]
+The 6 servers contain the following 113 primary bucket ids:
+         Server server-1-a in zone zoneA contains 18 primary bucket ids: [1, 3, 10, 18, 22, 35, 37, 40, 51, 55, 61, 63, 68, 73, 81, 93, 103, 109]
+         Server server-1-b in zone zoneB contains 19 primary bucket ids: [4, 6, 12, 19, 24, 34, 43, 49, 62, 67, 72, 75, 82, 83, 92, 96, 99, 100, 111]
+         Server server-2-a in zone zoneA contains 19 primary bucket ids: [0, 5, 8, 14, 17, 20, 31, 36, 42, 45, 47, 53, 66, 71, 77, 87, 90, 98, 102]
+         Server server-3-a in zone zoneA contains 19 primary bucket ids: [2, 13, 16, 21, 26, 28, 33, 39, 46, 48, 56, 58, 65, 70, 80, 84, 95, 97, 105]
+         Server server-2-b in zone zoneB contains 19 primary bucket ids: [9, 11, 23, 27, 30, 41, 44, 52, 54, 60, 74, 78, 86, 88, 89, 94, 101, 107, 112]
+         Server server-3-b in zone zoneB contains 19 primary bucket ids: [7, 15, 25, 29, 32, 38, 50, 57, 59, 64, 69, 76, 79, 85, 91, 104, 106, 108, 110]
 The 2 redundancy zones contain the following bucket ids:
         Zone zoneB contains 113 bucket ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112]
         Zone zoneA contains 113 bucket ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112]
+The 2 redundancy zones contain the following primary bucket ids:
+        Zone zoneB contains 57 primary bucket ids: [4, 6, 7, 9, 11, 12, 15, 19, 23, 24, 25, 27, 29, 30, 32, 34, 38, 41, 43, 44, 49, 50, 52, 54, 57, 59, 60, 62, 64, 67, 69, 72, 74, 75, 76, 78, 79, 82, 83, 85, 86, 88, 89, 91, 92, 94, 96, 99, 100, 101, 104, 106, 107, 108, 110, 111, 112]
+        Zone zoneA contains 56 primary bucket ids: [0, 1, 2, 3, 5, 8, 10, 13, 14, 16, 17, 18, 20, 21, 22, 26, 28, 31, 33, 35, 36, 37, 39, 40, 42, 45, 46, 47, 48, 51, 53, 55, 56, 58, 61, 63, 65, 66, 68, 70, 71, 73, 77, 80, 81, 84, 87, 90, 93, 95, 97, 98, 102, 103, 105, 109]
 The 2 redundancy zones contain the following missing bucket ids:
         Zone zoneB has 0 missing bucket ids: []
         Zone zoneA has 0 missing bucket ids: []

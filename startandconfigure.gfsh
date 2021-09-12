@@ -9,11 +9,11 @@ configure pdx --read-serialized=true --disk-store=DEFAULT --auto-serializable-cl
 
 # Start Servers
 start server --name=server-1-a --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneA
-#start server --name=server-2-a --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneA
-#start server --name=server-3-a --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneA
+start server --name=server-2-a --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneA
+start server --name=server-3-a --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneA
 start server --name=server-1-b --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneB
-#start server --name=server-2-b --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneB
-#start server --name=server-3-b --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneB
+start server --name=server-2-b --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneB
+start server --name=server-3-b --server-port=0 --statistic-archive-file=cacheserver.gfs --J=-Dgemfire.log-file=cacheserver.log --J=-Dgemfire.conserve-sockets=false --J=-Dgemfire.redundancy-zone=zoneB
 
 # Deploy Functions and PartitionResolver
 deploy --jar=server/build/libs/server-0.0.1-SNAPSHOT.jar

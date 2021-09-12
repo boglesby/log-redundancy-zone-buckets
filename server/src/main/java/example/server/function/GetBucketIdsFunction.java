@@ -27,8 +27,9 @@ public class GetBucketIdsFunction implements Function<Object[]>, Declarable {
     // Create the data structure
     String redundancyZone = ((InternalDistributedSystem) context.getCache().getDistributedSystem()).getConfig().getRedundancyZone();
     int configuredNumberOfBuckets = region.getTotalNumberOfBuckets();
-    List<Integer> localBucketIds = new ArrayList<>(region.getDataStore().getAllLocalBucketIds());
-    ServerBucketIds ids = new ServerBucketIds(regionName, redundancyZone, configuredNumberOfBuckets, localBucketIds);
+    List<Integer> allBucketIds = new ArrayList<>(region.getDataStore().getAllLocalBucketIds());
+    List<Integer> primaryBucketIds = new ArrayList<>(region.getDataStore().getAllLocalPrimaryBucketIds());
+    ServerBucketIds ids = new ServerBucketIds(regionName, redundancyZone, configuredNumberOfBuckets, allBucketIds, primaryBucketIds);
 
     // Return result
     context.getResultSender().lastResult(ids);

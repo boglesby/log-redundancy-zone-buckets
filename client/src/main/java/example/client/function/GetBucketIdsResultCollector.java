@@ -1,13 +1,10 @@
 package example.client.function;
 
-import example.client.service.CustomerService;
 import example.domain.AllBucketIds;
 import example.domain.ServerBucketIds;
 import org.apache.geode.cache.execute.FunctionException;
 import org.apache.geode.cache.execute.ResultCollector;
 import org.apache.geode.distributed.DistributedMember;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -16,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class GetBucketIdsResultCollector implements ResultCollector<ServerBucketIds, AllBucketIds> {
 
   private AllBucketIds allBucketIds;
-
-  private static final Logger logger = LoggerFactory.getLogger(GetBucketIdsResultCollector.class);
 
   public GetBucketIdsResultCollector() {
     clearResults();
